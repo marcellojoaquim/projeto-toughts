@@ -10,6 +10,12 @@ const app = express();
 const Tought = require('./models/Tought');
 const User = require('./models/User');
 
+// import routes
+const toughtsRoutes = require('./routes/toughtsRoutes');
+
+// import controller
+const ToughtController = require('./controllers/toughtController');
+
 
 //config tamplate engine
 app.engine('handlebars', exphbs.engine());
@@ -57,6 +63,10 @@ app.use((req, res, next)=>{
     next();
 })
 
+// routes
+app.use('/toughts', toughtsRoutes);
+
+app.get('/', ToughtController.showToughts)
 
 conn
     //.sync({force:true}) nesta instrução todas a entidades são removidas e recriadas no banco
