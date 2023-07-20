@@ -71,7 +71,7 @@ app.use('/', authRoutes);
 app.get('/', ToughtController.showToughts)
 
 conn
-    //.sync({force:true}) nesta instrução todas a entidades são removidas e recriadas no banco
+    //.sync({force:true})// nesta instrução todas a entidades são removidas e recriadas no banco
     .sync()
     .then(() => {
         app.listen(3000);
