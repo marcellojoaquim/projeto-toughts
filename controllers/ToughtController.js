@@ -1,9 +1,33 @@
 const Tought = require('../models/Tought');
 const User = require('../models/User');
 
+const {Op} = require('sequelize');
+
 module.exports = class ToughtController {
+
     static async showToughts(req, res) {
-        res.render('toughts/home');
+
+        let search = '';
+
+        if(req.query.search){
+            search = req.query.search;
+        }
+
+        const toughtsData = await Tought.findAll({
+            include: User,
+            where: {
+                title: {[Op.like]: `%${search}%`}
+            }
+        });
+        const toughts = toughtsData.map((result)=> result.get({plain:true}));
+
+        let toughtsQty = toughts.length;
+
+        if(toughtsQty ===0){
+            toughtsQty = false;
+        }
+
+        res.render('toughts/home', {toughts, search, toughtsQty});
     }
 
     static async dashboard(req, res) {
@@ -68,5 +92,37 @@ module.exports = class ToughtController {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    static async updateTought(req, res) {
+        const id = req.params.id;
+
+        try {
+            const tought = await Tought.findOne({ where: { id: id }, raw: true });
+            res.render('toughts/edit', { tought });
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    static async updateToughtSave(req, res){
+
+        const id = req.body.id;
+        const tought = {
+            title: req.body.title
+        }
+
+        try {
+            await Tought.update(tought, {where:{id:id}});
+        req.flash('message', 'Pensamento atualizado com sucesso!');
+
+        req.session.save(()=>{
+            res.redirect('/toughts/dashboard');
+        })
+        } catch (error) {
+          console.log(error)  
+        }
+        
     }
 }
